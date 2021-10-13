@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Matrix/matrix.h"
+#include "Algebra/algebra.h"
 #include "TimeMeasurer/time_measurer.h"
 
 void TestMatrixMult() {
@@ -13,77 +14,92 @@ void TestMatrixMult() {
   }
 }
 
-template<class T>
-void LU(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& u) {
-  if (!a.Square()) {
-    throw std::runtime_error("A is not square");
-  }
-  auto n = a.Size().first;
-  u = a;
+void TestSolvers(int n, int test_count, int seed) {
+  Matrix<double> a(n);
+  a.Randomize();
   for (int i = 0; i < n; i++) {
-    for (int j = i; j < n; j++) {
-      l[j][i] = u[j][i] / u[i][i];
+    for (int j = i + 1; j < n; j++) {
+      a[i][j] = a[j][i];
     }
   }
+  Matrix<double> b(n, 1);
 
-  for (int k = 1; k < n; k++) {
-    for (int i = k - 1; i < n; i++) {
-      for (int j = i; j < n; j++) {
-        l[j][i] = u[j][i] / u[i][i];
-      }
-    }
+  Matrix<double> lu_l(n);
+  Matrix<double> lu_u(n);
+  algebra::GetLu(a, lu_l, lu_u);
+  std::cout << "Ready lu\n";
 
-    for (int i = k; i < n; i++) {
-      for (int j = k - 1; j < n; j++) {
-        u[i][j] = u[i][j] - l[i][k - 1] * u[k - 1][j];
-      }
-    }
-  }
-}
+  Matrix<double> ldlt_l(n);
+  Matrix<double> ldlt_d(n, 1);
+  algebra::GetLdlt(a, ldlt_l, ldlt_d);
+  std::cout << "Ready ldlt\n";
 
-template<class T>
-Matrix<T> Solve(const Matrix<T>& l, const Matrix<T>& u, const Matrix<T>& b) {
-  // Ly = b;
-  Matrix<T> y(b.Size().first, 1);
-  for (int i = 0; i < y.Size().first; i++) {
-    T sum = b[i][0];
-    for (int j = 0; j < i; j++) {
-      sum -= y[j][0] * l[i][j];
+  srand(seed);
+  {
+    TimeMeasurer time_measurer;
+    for (int test = 0; test < test_count; test++) {
+      b.Randomize();
+      auto lu_x = algebra::LuSolve(lu_l, lu_u, b);
+      // if (a * lu_x != b) {
+      //   std::cerr << a.ToWolframString() << '\n' << b.ToWolframString() << '\n';
+      //   std::cerr << "lu\n";
+      //   return;
+      // }
     }
-    y[i][0] = sum;
+    std::cout << "Lu: " << time_measurer.GetDurationString() << '\n';
   }
-  // Ux = y;
-  Matrix<T> x(b.Size().first, 1);
-  for (int i = x.Size().first - 1; i >= 0; i--) {
-    T sum = y[i][0];
-    for (int j = x.Size().first - 1; j > i; j--) {
-      sum -= x[j][0] * u[i][j];
+  srand(seed);
+  {
+    TimeMeasurer time_measurer;
+    for (int test = 0; test < test_count; test++) {
+      b.Randomize();
+      auto ldlt_x = algebra::LdltSolve(ldlt_l, ldlt_d, b);
+      // if (a * ldlt_x != b) {
+      //   std::cerr << a.ToWolframString() << '\n' << b.ToWolframString() << '\n';
+      //   std::cerr << "ldlt\n";
+      //   return;
+      // }
     }
-    x[i][0] = sum / u[i][i];
+    std::cout << "Ldlt: " << time_measurer.GetDurationString() << '\n';
   }
-  return x;
 }
 
 int main() {
   srand(time(0));
   TimeMeasurer time_measurer;
-  int n = 3;
-  Matrix<double> a(n);
-  a[0][0] = a[1][1] = 2;
-  a[1][0] = 3;
-  a.Randomize();
-  Matrix<double> l(n);
-  Matrix<double> u(n);
-  LU(a, l, u);
-  // std::cout << l << '\n' << u << '\n' << l * u << '\n' << a << '\n';
-  Matrix<double> b(n, 1);
-  b[0][0] = 4;
-  b[0][1] = 5;
-  b.Randomize();
-  std::cout << a.ToWolframString() << '\n' << b.ToWolframString() << '\n';
-  auto solve = Solve(l, u, b);
-  std::cout << solve.ToWolframString() << '\n';
-  std::cout << a * solve;
+
+  TestSolvers(2000, 1000, time(0));
+
+  // int n = 3;
+  // Matrix<double> a(n);
+  // a.Randomize();
+  // for (int i = 0; i < n; i++) {
+  //   for (int j = i + 1; j < n; j++) {
+  //     a[i][j] = a[j][i];
+  //   }
+  // }
+  // Matrix<double> b(n, 1);
+  // b.Randomize();
+  // std::cout << "A = \n" << a << '\n';
+  // std::cout << "b = \n" << b << '\n';
+
+  // Matrix<double> l(n);
+  // Matrix<double> u(n);
+  // GetLu(a, l, u);
+  // auto solve = LuSolve(l, u, b);
+  // std::cout << solve.ToWolframString() << '\n';
+  // std::cout << a * solve;
+
+  // Matrix<double> l(n);
+  // Matrix<double> d(n, 1);
+  // Matrix<double> d_m(n);
+  // algebra::GetLdlt(a, l, d);
+  // for (int i = 0; i < n; i++) {
+  //   d_m[i][i] = d[i];
+  // }
+  // // std::cout << l << '\n' << d_m << '\n' << l * d_m * l.Transposed() << '\n';
+  // auto solve = algebra::LdltSolve(l, d, b);
+  // std::cout << a * solve << '\n';
 
   // TestMatrixMult();
   // Matrix<double> a(2, 3);

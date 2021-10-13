@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 project(vma1)
 
+add_compile_options(
+        "$<$<CONFIG:RELEASE>:-O3>"
+        "$<$<CONFIG:DEBUG>:-O0>"
+)
+
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_INCLUDE_CURRENT_DIR true)
 
 # ThreadSanitizer
 set(TSAN_FLAGS
@@ -37,4 +43,8 @@ set(UBSAN_FLAGS
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${UBSAN_FLAGS}")
 
 add_executable(vma1 main.cpp
-        Matrix/matrix.cpp TimeMeasurer/time_measurer.cpp TimeMeasurer/time_measurer.h)
+        Matrix/matrix.cpp
+        TimeMeasurer/time_measurer.cpp
+        TimeMeasurer/time_measurer.h
+        Algebra/algebra.cpp
+        Algebra/algebra.h)

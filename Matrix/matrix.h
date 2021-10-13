@@ -3,6 +3,8 @@
 #include <iostream>
 #include <iomanip>
 
+const double kEps = 1e-6;
+
 template<typename T>
 class Matrix {
  public:
@@ -12,6 +14,14 @@ class Matrix {
     }
     inline const T& operator[](size_t index2) const noexcept {
       return matrix_->data_[matrix_->m_ * index1_ + index2];
+    }
+    operator T() const {
+      if (matrix_->Size().second == 1) {
+        return (*this)[0];
+      } else if (matrix_->Size().first == 1) {
+        return matrix_->data_[index1_];
+      }
+      throw std::runtime_error("Cannot cast");
     }
    private:
     friend class Matrix<T>;
@@ -88,7 +98,7 @@ class Matrix {
       return true;
     }
     for (size_t i = 0; i < data_size_; i++) {
-      if (data_[i] != other.data_[i]) {
+      if (std::abs(data_[i] - other.data_[i]) > kEps) {
         return false;
       }
     }
@@ -135,6 +145,15 @@ class Matrix {
         this->At(i, j) = rand() % max;
       }
     }
+  }
+  Matrix<T> Transposed() const {
+    Matrix<T> res(m_, n_);
+    for (int i = 0; i < n_; i++) {
+      for (int j = 0; j < m_; j++) {
+        res[j][i] = this->At(i, j);
+      }
+    }
+    return res;
   }
 
   template<class U>
