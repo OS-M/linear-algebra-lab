@@ -3,6 +3,7 @@
 #include "Matrix/matrix.h"
 #include "Algebra/algebra.h"
 #include "TimeMeasurer/time_measurer.h"
+#include "Matrix/diagonal_box_matrix.h"
 
 void TestMatrixMult() {
   for (int k = 0; k < 1000; k++) {
@@ -68,6 +69,7 @@ int main() {
   srand(time(0));
   TimeMeasurer time_measurer;
 
+  std::cout << DiagonalBoxMatrix<double>(3);
   TestSolvers(50, 1000, time(0));
 
   // int n = 3;

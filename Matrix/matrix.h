@@ -3,37 +3,38 @@
 #include <iostream>
 #include <iomanip>
 #include "abstract_matrix.h"
+#include "mutable_matrix.h"
 
 const double kEps = 1e-6;
 
 template<typename T>
-class Matrix : public AbstractMatrix<T> {
+class Matrix : public MutableMatrix<T> {
  public:
-  explicit Matrix(size_t size) : AbstractMatrix<T>(size, size),
+  explicit Matrix(size_t size) : MutableMatrix<T>(size, size),
                                  data_size_{size * size} {
     data_ = new T[data_size_];
     for (size_t i = 0; i < data_size_; i++) {
       data_[i] = T();
     }
   }
-  explicit Matrix(size_t n, size_t m) : AbstractMatrix<T>(n, m),
+  explicit Matrix(size_t n, size_t m) : MutableMatrix<T>(n, m),
                                         data_size_{n * m} {
     data_ = new T[data_size_];
     for (size_t i = 0; i < data_size_; i++) {
       data_[i] = T();
     }
   }
-  Matrix(size_t n, size_t m, T default_) : AbstractMatrix<T>(n, m),
+  Matrix(size_t n, size_t m, T default_) : MutableMatrix<T>(n, m),
                                            data_size_{n * m} {
     data_ = new T[data_size_];
     for (size_t i = 0; i < data_size_; i++) {
       data_[i] = default_;
     }
   }
-  Matrix(const Matrix<T>& matrix) : AbstractMatrix<T>(matrix.n_, matrix.m_) {
+  Matrix(const Matrix<T>& matrix) : MutableMatrix<T>(matrix.n_, matrix.m_) {
     *this = matrix;
   }
-  Matrix(Matrix<T>&& matrix) noexcept: AbstractMatrix<T>(matrix.n_, matrix.m_) {
+  Matrix(Matrix<T>&& matrix) noexcept: MutableMatrix<T>(matrix.n_, matrix.m_) {
     *this = std::move(matrix);
   }
   virtual ~Matrix() {
@@ -106,10 +107,7 @@ class Matrix : public AbstractMatrix<T> {
     return res;
   }
 
-  template<class U>
-  friend std::ostream& operator<<(std::ostream& stream,
-                                  const Matrix<U>& matrix);
-  inline const T& At(size_t index1, size_t index2) const override {
+  inline T At(size_t index1, size_t index2) const override {
     return data_[this->m_ * index1 + index2];
   }
   inline T& At(size_t index1, size_t index2) override {

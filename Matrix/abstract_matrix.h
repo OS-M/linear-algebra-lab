@@ -7,41 +7,9 @@
 
 template<class T>
 class AbstractMatrix {
- protected:
-  class DataAccessor {
-   public:
-    DataAccessor(AbstractMatrix<T>* matrix, size_t index1) :
-        matrix_{matrix},
-        index1_{index1} {}
-    inline T& operator[](size_t index2) noexcept {
-      return matrix_->At(index1_, index2);
-    }
-    inline const T& operator[](size_t index2) const noexcept {
-      return matrix_->At(index1_, index2);
-    }
-    operator T() const {
-      if (matrix_->Size().second == 1) {
-        return (*this)[0];
-      } else if (matrix_->Size().first == 1) {
-        return matrix_->At(index1_, 0);
-      }
-      throw std::runtime_error("Cannot cast");
-    }
-
-   private:
-    AbstractMatrix<T>* matrix_;
-    size_t index1_{0};
-  };
-
  public:
   AbstractMatrix(size_t n, size_t m) : n_{n}, m_{m} {};
   virtual ~AbstractMatrix() = default;
-  inline DataAccessor operator[](size_t index) noexcept {
-    return DataAccessor(this, index);
-  }
-  inline const DataAccessor operator[](size_t index) const noexcept {
-    return DataAccessor(const_cast<AbstractMatrix<T>*>(this), index);
-  }
   bool IsOneDimensional() const {
     return n_ == 1 || m_ == 1;
   }
@@ -67,7 +35,7 @@ class AbstractMatrix {
     res << "}";
     return res.str();
   }
-  virtual void Randomize(int max = 1000) = 0;
+  virtual void Randomize(int max = 1000) {};
 
   template<class U>
   friend std::ostream& operator<<(std::ostream& stream,
@@ -82,8 +50,10 @@ class AbstractMatrix {
     return m_;
   }
 
-  virtual inline const T& At(size_t index1, size_t index2) const = 0;
-  virtual inline T& At(size_t index1, size_t index2) = 0;
+  virtual inline T At(size_t index1, size_t index2) const = 0;
+  inline T operator[](size_t index1, size_t index2) const noexcept {
+    return DataAccessor(const_cast<AbstractMatrix<T>*>(this), index);
+  }
 
  protected:
   size_t n_{0};

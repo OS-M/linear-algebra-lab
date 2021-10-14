@@ -47,4 +47,4 @@ add_executable(vma1 main.cpp
         TimeMeasurer/time_measurer.cpp
         TimeMeasurer/time_measurer.h
         Algebra/algebra.cpp
-        Algebra/algebra.h Matrix/abstract_matrix.cpp Matrix/abstract_matrix.h)
+        Algebra/algebra.h Matrix/abstract_matrix.cpp Matrix/abstract_matrix.h Matrix/diagonal_box_matrix.cpp Matrix/diagonal_box_matrix.h Matrix/mutable_matrix.h)
