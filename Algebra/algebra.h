@@ -1,130 +1,139 @@
 #pragma once
 
+#include "Matrix/abstract_matrix.h"
 #include "Matrix/matrix.h"
 
 namespace algebra {
 
 template<class T>
-void GetLu(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& u);
+void GetLu(const AbstractMatrix<T>& a,
+           MutableMatrix<T>& l,
+           MutableMatrix<T>& u);
 
 template<class T>
-void GetLdlt(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& d);
+void GetLdlt(const AbstractMatrix<T>& a,
+             MutableMatrix<T>& l,
+             MutableMatrix<T>& d);
 
 template<class T>
-Matrix<T> SolveLxb(const Matrix<T>& l,
-                   const Matrix<T>& b);
+Matrix<T> SolveLxb(const AbstractMatrix<T>& l,
+                   const AbstractMatrix<T>& b);
 
 template<class T>
-Matrix<T> SolveUxb(const Matrix<T>& u,
-                   const Matrix<T>& b);
+Matrix<T> SolveUxb(const AbstractMatrix<T>& u,
+                   const AbstractMatrix<T>& b);
 
 template<class T>
-Matrix<T> LuSolve(const Matrix<T>& l,
-                  const Matrix<T>& u,
-                  const Matrix<T>& b);
+Matrix<T> LuSolve(const AbstractMatrix<T>& l,
+                  const AbstractMatrix<T>& u,
+                  const AbstractMatrix<T>& b);
 
 template<class T>
-Matrix<T> LdltSolve(const Matrix<T>& l,
-                    const Matrix<T>& d,
-                    const Matrix<T>& b);
+Matrix<T> LdltSolve(const AbstractMatrix<T>& l,
+                    const AbstractMatrix<T>& d,
+                    const AbstractMatrix<T>& b);
 
 }
 
 namespace algebra {
 
 template<class T>
-void GetLu(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& u) {
+void GetLu(const AbstractMatrix<T>& a,
+           MutableMatrix<T>& l,
+           MutableMatrix<T>& u) {
   if (!a.IsSquare()) {
     throw std::runtime_error("A is not square");
   }
-  auto n = a.Size().first;
+  auto n = a.Rows();
   u = a;
   for (int i = 0; i < n; i++) {
     for (int j = i; j < n; j++) {
-      l[j][i] = u[j][i] / u[i][i];
+      l.At(j, i) = u.At(j, i) / u.At(i, i);
     }
   }
 
   for (int k = 1; k < n; k++) {
     for (int i = k - 1; i < n; i++) {
       for (int j = i; j < n; j++) {
-        l[j][i] = u[j][i] / u[i][i];
+        l.At(j, i) = u.At(j, i) / u.At(i, i);
       }
     }
 
     for (int i = k; i < n; i++) {
       for (int j = k - 1; j < n; j++) {
-        u[i][j] = u[i][j] - l[i][k - 1] * u[k - 1][j];
+        u.At(i, j) = u.At(i, j) - l.At(i, k - 1) * u.At(k - 1, j);
       }
     }
   }
 }
 
 template<class T>
-void GetLdlt(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& d) {
-  int n = a.Size().first;
+void GetLdlt(const AbstractMatrix<T>& a,
+             MutableMatrix<T>& l,
+             MutableMatrix<T>& d) {
+  int n = a.Rows();
   for (int i = 0; i < n; i++) {
     for (int j = i; j < n; j++) {
-      T sum = a[j][i];
+      T sum = a.At(j, i);
       for (int k = 0; k < i; k++) {
-        sum -= l[i][k] * d[k][0] * l[j][k];
+        sum -= l.At(i, k) * d.At(k, 0) * l.At(j, k);
       }
       if (i == j) {
         // if (sum <= 0) {
         // throw std::runtime_error("A is not positive defined");
         // }
-        d[i][0] = sum;
-        l[i][i] = 1;
+        d.At(i, 0) = sum;
+        l.At(i, i) = 1;
       } else {
-        l[j][i] = sum / d[i][0];
+        l.At(j, i) = sum / d.At(i, 0);
       }
     }
   }
 }
 
 template<class T>
-Matrix<T> SolveLxb(const Matrix<T>& l,
-                   const Matrix<T>& b) {
-  Matrix<T> x(b.Size().first, 1);
-  for (int i = 0; i < x.Size().first; i++) {
-    T sum = b[i][0];
+Matrix<T> SolveLxb(const AbstractMatrix<T>& l,
+                   const AbstractMatrix<T>& b) {
+  Matrix<T> x(b.Rows(), 1);
+  for (int i = 0; i < x.Rows(); i++) {
+    T sum = b.At(i, 0);
     for (int j = 0; j < i; j++) {
-      sum -= x[j][0] * l[i][j];
+      sum -= x.At(j, 0) * l.At(i, j);
     }
-    x[i][0] = sum / l[i][i];
+    x.At(i, 0) = sum / l.At(i, i);
   }
   return x;
 }
 
 template<class T>
-Matrix<T> SolveUxb(const Matrix<T>& u,
-                   const Matrix<T>& b) {
-  Matrix<T> x(b.Size().first, 1);
-  for (int i = x.Size().first - 1; i >= 0; i--) {
-    T sum = b[i][0];
-    for (int j = x.Size().first - 1; j > i; j--) {
-      sum -= x[j][0] * u[i][j];
+Matrix<T> SolveUxb(const AbstractMatrix<T>& u,
+                   const AbstractMatrix<T>& b) {
+  Matrix<T> x(b.Rows(), 1);
+  for (int i = x.Rows() - 1; i >= 0; i--) {
+    T sum = b.At(i, 0);
+    for (int j = x.Rows() - 1; j > i; j--) {
+      sum -= x.At(j, 0) * u.At(i, j);
     }
-    x[i][0] = sum / u[i][i];
+    x.At(i, 0) = sum / u.At(i, i);
   }
   return x;
 }
 
 template<class T>
-Matrix<T> LuSolve(const Matrix<T>& l,
-                  const Matrix<T>& u,
-                  const Matrix<T>& b) {
+Matrix<T> LuSolve(const AbstractMatrix<T>& l,
+                  const AbstractMatrix<T>& u,
+                  const AbstractMatrix<T>& b) {
   return SolveUxb(u, SolveLxb(l, b));
 }
 
 template<class T>
-Matrix<T> LdltSolve(const Matrix<T>& l,
-                    const Matrix<T>& d,
-                    const Matrix<T>& b) {
-  auto n = d.Size().first;
+Matrix<T> LdltSolve(const AbstractMatrix<T>& l,
+                    const AbstractMatrix<T>& d,
+                    const AbstractMatrix<T>& b) {
+  auto n = d.Rows();
   auto y = SolveLxb(l, b);
   for (int i = 0; i < n; i++) {
-    y[i][0] /= d[i][0];
+    y.At(i, 0) /= d.At(i, 0);
   }
   return SolveUxb(l.Transposed(), y);
 }

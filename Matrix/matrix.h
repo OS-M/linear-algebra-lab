@@ -4,6 +4,7 @@
 #include <iomanip>
 #include "abstract_matrix.h"
 #include "mutable_matrix.h"
+#include "transposed_matrix.h"
 
 const double kEps = 1e-6;
 
@@ -40,15 +41,15 @@ class Matrix : public MutableMatrix<T> {
   virtual ~Matrix() {
     Reset();
   }
-  Matrix& operator=(const Matrix<T>& other) {
-    if (other.data_ != data_) {
-      Reset();
-      this->n_ = other.n_;
-      this->m_ = other.m_;
-      data_size_ = other.data_size_;
-      data_ = new T[data_size_];
-      for (int i = 0; i < data_size_; i++) {
-        data_[i] = other.data_[i];
+  Matrix& operator=(const AbstractMatrix<T>& other) override {
+    Reset();
+    this->n_ = other.Rows();
+    this->m_ = other.Cols();
+    data_size_ = this->n_ * this->m_;
+    data_ = new T[data_size_];
+    for (int i = 0; i < this->Rows(); i++) {
+      for (int j = 0; j < this->Cols(); j++) {
+        this->At(i, j) = other.At(i, j);
       }
     }
     return *this;
@@ -75,16 +76,16 @@ class Matrix : public MutableMatrix<T> {
     return true;
   }
   Matrix operator*(const Matrix& other) const {
-    if (this->Size().second != other.Size().first) {
+    if (this->Cols() != other.Rows()) {
       throw std::runtime_error(
-          "Bad matrix sizes " + std::to_string(this->Size().second) + ' '
-              + std::to_string(other.Size().first));
+          "Bad matrix sizes " + std::to_string(this->Cols()) + ' '
+              + std::to_string(other.Rows()));
     }
     Matrix<T> result(this->n_, other.m_);
     for (int i = 0; i < this->n_; i++) {
       for (int k = 0; k < this->m_; k++) {
         for (int j = 0; j < other.m_; j++) {
-          result[i][j] += this->At(i, k) * other.At(k, j);
+          result.At(i, j) += this->At(i, k) * other.At(k, j);
         }
       }
     }
@@ -97,39 +98,29 @@ class Matrix : public MutableMatrix<T> {
       }
     }
   }
-  Matrix<T> Transposed() const {
-    Matrix<T> res(this->m_, this->n_);
-    for (int i = 0; i < this->n_; i++) {
-      for (int j = 0; j < this->m_; j++) {
-        res[j][i] = this->At(i, j);
-      }
-    }
-    return res;
-  }
 
   inline T At(size_t index1, size_t index2) const override {
+#ifndef NDEBUG
     if (index1 >= this->Rows() || index2 >= this->Cols()) {
       throw std::out_of_range(
           "Indexes " + std::to_string(index1) + " " + std::to_string(index2)
               + " out of size " + std::to_string(this->Rows()) + " "
               + std::to_string(this->Cols()));
     }
+#endif
     return data_[this->m_ * index1 + index2];
   }
+
   inline T& At(size_t index1, size_t index2) override {
+#ifndef NDEBUG
     if (index1 >= this->Rows() || index2 >= this->Cols()) {
       throw std::out_of_range(
           "Indexes " + std::to_string(index1) + " " + std::to_string(index2)
               + " out of size " + std::to_string(this->Rows()) + " "
               + std::to_string(this->Cols()));
     }
+#endif
     return data_[this->m_ * index1 + index2];
-  }
-  inline T* operator[](size_t index) noexcept {
-    return data_ + this->m_ * index;
-  }
-  inline T const* operator[](size_t index) const noexcept {
-    return data_ + this->m_ * index;
   }
 
  private:

@@ -9,4 +9,5 @@ class MutableMatrix : public AbstractMatrix<T> {
   MutableMatrix(size_t n, size_t m) : AbstractMatrix<T>(n, m) {}
   virtual ~MutableMatrix() = default;
   virtual inline T& At(size_t index1, size_t index2) = 0;
+  virtual MutableMatrix<T>& operator=(const AbstractMatrix<T>& matrix) = 0;
 };

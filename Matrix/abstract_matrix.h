@@ -6,6 +6,9 @@
 #include <iomanip>
 
 template<class T>
+class TransposedMatrix;
+
+template<class T>
 class AbstractMatrix {
  public:
   AbstractMatrix(size_t n, size_t m) : n_{n}, m_{m} {};
@@ -16,14 +19,26 @@ class AbstractMatrix {
   bool IsSquare() const {
     return n_ == m_;
   }
+  virtual void Randomize(int max = 1000) {};
+  virtual size_t Rows() const {
+    return n_;
+  }
+  virtual size_t Cols() const {
+    return m_;
+  }
+  virtual inline T At(size_t index1, size_t index2) const = 0;
+  TransposedMatrix<T> Transposed() const {
+    return TransposedMatrix<T>(*this);
+  }
+
   std::string ToWolframString() const {
     std::stringstream res;
     res << "{";
     for (int i = 0; i < this->Size().first; i++) {
       res << "{";
-      for (int j = 0; j < this->Size().second; j++) {
+      for (int j = 0; j < this->Cols(); j++) {
         res << std::fixed << std::setprecision(4) << this->At(i, j);
-        if (j + 1 != this->Size().second) {
+        if (j + 1 != this->Cols()) {
           res << ",";
         }
       }
@@ -35,22 +50,6 @@ class AbstractMatrix {
     res << "}";
     return res.str();
   }
-  virtual void Randomize(int max = 1000) {};
-
-  template<class U>
-  friend std::ostream& operator<<(std::ostream& stream,
-                                  const AbstractMatrix<U>& matrix);
-  inline std::pair<size_t, size_t> Size() const noexcept {
-    return {n_, m_};
-  }
-  size_t Rows() const {
-    return n_;
-  }
-  size_t Cols() const {
-    return m_;
-  }
-
-  virtual inline T At(size_t index1, size_t index2) const = 0;
 
  protected:
   size_t n_{0};
@@ -61,26 +60,26 @@ template<class U>
 std::ostream& operator<<(std::ostream& stream,
                          const AbstractMatrix<U>& matrix) {
   size_t maxlen = 0;
-  for (size_t i = 0; i < matrix.Size().first; i++) {
-    for (size_t j = 0; j < matrix.Size().second; j++) {
+  for (size_t i = 0; i < matrix.Rows(); i++) {
+    for (size_t j = 0; j < matrix.Cols(); j++) {
       std::stringstream ss;
       ss << std::fixed << std::setprecision(5) << matrix.At(i, j);
       maxlen = std::max(maxlen, ss.str().length());
     }
   }
   stream << "[";
-  for (size_t i = 0; i < matrix.Size().first; i++) {
+  for (size_t i = 0; i < matrix.Rows(); i++) {
     if (i != 0) {
       stream << ' ';
     }
-    for (size_t j = 0; j < matrix.Size().second; j++) {
+    for (size_t j = 0; j < matrix.Cols(); j++) {
       stream << std::fixed << std::setprecision(5) << std::setw(maxlen)
              << matrix.At(i, j);
-      if (i + 1 < matrix.Size().first || j + 1 < matrix.Size().second) {
+      if (i + 1 < matrix.Rows() || j + 1 < matrix.Cols()) {
         stream << ", ";
       }
     }
-    if (i + 1 < matrix.Size().first) {
+    if (i + 1 < matrix.Rows()) {
       stream << '\n';
     }
   }
