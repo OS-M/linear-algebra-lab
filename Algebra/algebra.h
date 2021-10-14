@@ -34,7 +34,7 @@ namespace algebra {
 
 template<class T>
 void GetLu(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& u) {
-  if (!a.Square()) {
+  if (!a.IsSquare()) {
     throw std::runtime_error("A is not square");
   }
   auto n = a.Size().first;

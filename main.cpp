@@ -68,7 +68,7 @@ int main() {
   srand(time(0));
   TimeMeasurer time_measurer;
 
-  TestSolvers(2000, 1000, time(0));
+  TestSolvers(50, 1000, time(0));
 
   // int n = 3;
   // Matrix<double> a(n);
