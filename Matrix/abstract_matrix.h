@@ -51,9 +51,6 @@ class AbstractMatrix {
   }
 
   virtual inline T At(size_t index1, size_t index2) const = 0;
-  inline T operator[](size_t index1, size_t index2) const noexcept {
-    return DataAccessor(const_cast<AbstractMatrix<T>*>(this), index);
-  }
 
  protected:
   size_t n_{0};
@@ -67,7 +64,7 @@ std::ostream& operator<<(std::ostream& stream,
   for (size_t i = 0; i < matrix.Size().first; i++) {
     for (size_t j = 0; j < matrix.Size().second; j++) {
       std::stringstream ss;
-      ss << std::fixed << std::setprecision(5) << matrix[i][j];
+      ss << std::fixed << std::setprecision(5) << matrix.At(i, j);
       maxlen = std::max(maxlen, ss.str().length());
     }
   }
@@ -78,7 +75,7 @@ std::ostream& operator<<(std::ostream& stream,
     }
     for (size_t j = 0; j < matrix.Size().second; j++) {
       stream << std::fixed << std::setprecision(5) << std::setw(maxlen)
-             << matrix[i][j];
+             << matrix.At(i, j);
       if (i + 1 < matrix.Size().first || j + 1 < matrix.Size().second) {
         stream << ", ";
       }

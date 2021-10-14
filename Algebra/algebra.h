@@ -67,7 +67,7 @@ void GetLdlt(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& d) {
     for (int j = i; j < n; j++) {
       T sum = a[j][i];
       for (int k = 0; k < i; k++) {
-        sum -= l[i][k] * d[k] * l[j][k];
+        sum -= l[i][k] * d[k][0] * l[j][k];
       }
       if (i == j) {
         // if (sum <= 0) {
@@ -76,7 +76,7 @@ void GetLdlt(const Matrix<T>& a, Matrix<T>& l, Matrix<T>& d) {
         d[i][0] = sum;
         l[i][i] = 1;
       } else {
-        l[j][i] = sum / d[i];
+        l[j][i] = sum / d[i][0];
       }
     }
   }
@@ -124,7 +124,7 @@ Matrix<T> LdltSolve(const Matrix<T>& l,
   auto n = d.Size().first;
   auto y = SolveLxb(l, b);
   for (int i = 0; i < n; i++) {
-    y[i][0] /= d[i];
+    y[i][0] /= d[i][0];
   }
   return SolveUxb(l.Transposed(), y);
 }

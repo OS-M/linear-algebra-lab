@@ -69,8 +69,8 @@ int main() {
   srand(time(0));
   TimeMeasurer time_measurer;
 
-  std::cout << DiagonalBoxMatrix<double>(3);
-  TestSolvers(50, 1000, time(0));
+  std::cout << DiagonalBoxMatrix<double>(6);
+  TestSolvers(200, 1000, time(0));
 
   // int n = 3;
   // Matrix<double> a(n);

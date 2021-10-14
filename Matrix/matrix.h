@@ -108,10 +108,28 @@ class Matrix : public MutableMatrix<T> {
   }
 
   inline T At(size_t index1, size_t index2) const override {
+    if (index1 >= this->Rows() || index2 >= this->Cols()) {
+      throw std::out_of_range(
+          "Indexes " + std::to_string(index1) + " " + std::to_string(index2)
+              + " out of size " + std::to_string(this->Rows()) + " "
+              + std::to_string(this->Cols()));
+    }
     return data_[this->m_ * index1 + index2];
   }
   inline T& At(size_t index1, size_t index2) override {
+    if (index1 >= this->Rows() || index2 >= this->Cols()) {
+      throw std::out_of_range(
+          "Indexes " + std::to_string(index1) + " " + std::to_string(index2)
+              + " out of size " + std::to_string(this->Rows()) + " "
+              + std::to_string(this->Cols()));
+    }
     return data_[this->m_ * index1 + index2];
+  }
+  inline T* operator[](size_t index) noexcept {
+    return data_ + this->m_ * index;
+  }
+  inline T const* operator[](size_t index) const noexcept {
+    return data_ + this->m_ * index;
   }
 
  private:
