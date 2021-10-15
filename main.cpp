@@ -57,6 +57,16 @@ void TestSolvers(int n, int test_count, int seed) {
 }
 
 int main() {
-  TestSolvers(400, 5000, time(0));
+  // TestSolvers(400, 5000, time(0));
+
+  int n = 10;
+  Matrix<double> b(n, 1);
+  for (int i = 0; i < n; i++) {
+    b.At(i, 0) = 1;
+  }
+  auto a = DiagonalBoxMatrix<double>(n);
+  auto solve = algebra::GaussSeidelSolve(a, b, 1e-10);
+  std::cout << solve << '\n';
+  std::cout << Matrix<double>::FromAbstract(a) * solve << '\n';
   return 0;
 }

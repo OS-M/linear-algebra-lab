@@ -33,6 +33,21 @@ Matrix<T> LdltSolve(const AbstractMatrix<T>& l,
                     const AbstractMatrix<T>& d,
                     const AbstractMatrix<T>& b);
 
+template<class T>
+Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
+                           const AbstractMatrix<T>& b);
+
+template<class T>
+T Norm2D(const AbstractMatrix<T>& a) {
+  T res = 0;
+  for (int i = 0; i < a.Rows(); i++) {
+    for (int j = 0; j < a.Cols(); j++) {
+      res += a.At(i, j) * a.At(i, j);
+    }
+  }
+  return res;
+}
+
 }
 
 namespace algebra {
@@ -136,6 +151,31 @@ Matrix<T> LdltSolve(const AbstractMatrix<T>& l,
     y.At(i, 0) /= d.At(i, 0);
   }
   return SolveUxb(l.Transposed(), y);
+}
+
+template<class T>
+Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
+                           const AbstractMatrix<T>& b,
+                           T eps,
+                           int check_metric_every = 10,
+                           int iteration_limit = 10000) {
+  Matrix<T> x(b.Rows(), 1);
+  int counter = 0;
+  while (counter++ < iteration_limit) {
+    for (int i = 0; i < b.Rows(); i++) {
+      T now = 0;
+      for (int j = 0; j < b.Rows(); j++) {
+        if (i != j) {
+          now += x.At(j, 0) * a.At(i, j);
+        }
+      }
+      x.At(i, 0) = (b.At(i, 0) - now) / a.At(i, i);
+    }
+    if (counter % check_metric_every == 0 && Norm2D(a * x - b) < eps) {
+      break;
+    }
+  }
+  return x;
 }
 
 }

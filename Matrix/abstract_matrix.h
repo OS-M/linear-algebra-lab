@@ -30,7 +30,6 @@ class AbstractMatrix {
   TransposedMatrix<T> Transposed() const {
     return TransposedMatrix<T>(*this);
   }
-
   std::string ToWolframString() const {
     std::stringstream res;
     res << "{";

@@ -32,7 +32,13 @@ class Matrix : public MutableMatrix<T> {
       data_[i] = default_;
     }
   }
-  Matrix(const Matrix<T>& matrix) : MutableMatrix<T>(matrix.n_, matrix.m_) {
+  static Matrix<T> FromAbstract(const AbstractMatrix<T>& matrix) {
+    Matrix<T> res(matrix.Rows(), matrix.Cols());
+    res = matrix;
+    return res;
+  }
+  Matrix(const Matrix<T>& matrix) :
+      MutableMatrix<T>(matrix.n_, matrix.m_) {
     *this = matrix;
   }
   Matrix(Matrix<T>&& matrix) noexcept: MutableMatrix<T>(matrix.n_, matrix.m_) {
@@ -40,6 +46,40 @@ class Matrix : public MutableMatrix<T> {
   }
   virtual ~Matrix() {
     Reset();
+  }
+  static Matrix<T> Ones(size_t n) {
+    Matrix<T> res(n);
+    for (int i = 0; i < n; i++) {
+      res.At(i, i) = 1;
+    }
+    return res;
+  }
+  Matrix operator+(const AbstractMatrix<T>& other) const {
+    Matrix res(*this);
+    for (int i = 0; i < this->Rows(); i++) {
+      for (int j = 0; j < this->Cols(); j++) {
+        res.At(i, j) += other.At(i, j);
+      }
+    }
+    return res;
+  }
+  Matrix operator-() const {
+    Matrix res(*this);
+    for (int i = 0; i < this->Rows(); i++) {
+      for (int j = 0; j < this->Cols(); j++) {
+        res.At(i, j) *= -1;
+      }
+    }
+    return res;
+  }
+  Matrix operator-(const AbstractMatrix<T>& other) const {
+    Matrix res(*this);
+    for (int i = 0; i < this->Rows(); i++) {
+      for (int j = 0; j < this->Cols(); j++) {
+        res.At(i, j) -= other.At(i, j);
+      }
+    }
+    return res;
   }
   Matrix& operator=(const AbstractMatrix<T>& other) override {
     Reset();
@@ -50,6 +90,21 @@ class Matrix : public MutableMatrix<T> {
     for (int i = 0; i < this->Rows(); i++) {
       for (int j = 0; j < this->Cols(); j++) {
         this->At(i, j) = other.At(i, j);
+      }
+    }
+    return *this;
+  }
+  Matrix& operator=(const Matrix<T>& other) {
+    if (data_ != other.data_) {
+      Reset();
+      this->n_ = other.Rows();
+      this->m_ = other.Cols();
+      data_size_ = this->n_ * this->m_;
+      data_ = new T[data_size_];
+      for (int i = 0; i < this->Rows(); i++) {
+        for (int j = 0; j < this->Cols(); j++) {
+          this->At(i, j) = other.At(i, j);
+        }
       }
     }
     return *this;
@@ -76,20 +131,7 @@ class Matrix : public MutableMatrix<T> {
     return true;
   }
   Matrix operator*(const Matrix& other) const {
-    if (this->Cols() != other.Rows()) {
-      throw std::runtime_error(
-          "Bad matrix sizes " + std::to_string(this->Cols()) + ' '
-              + std::to_string(other.Rows()));
-    }
-    Matrix<T> result(this->n_, other.m_);
-    for (int i = 0; i < this->n_; i++) {
-      for (int k = 0; k < this->m_; k++) {
-        for (int j = 0; j < other.m_; j++) {
-          result.At(i, j) += this->At(i, k) * other.At(k, j);
-        }
-      }
-    }
-    return result;
+    return static_cast<const AbstractMatrix<T>&>(*this) * other;
   }
   void Randomize(int max = 1000) override {
     for (int i = 0; i < this->Rows(); i++) {
@@ -131,3 +173,21 @@ class Matrix : public MutableMatrix<T> {
   size_t data_size_{0};
   T* data_{nullptr};
 };
+
+template <class T>
+Matrix<T> operator*(const AbstractMatrix<T>& lhs, const Matrix<T>& rhs) {
+  if (lhs.Cols() != rhs.Rows()) {
+    throw std::runtime_error(
+        "Bad matrix sizes " + std::to_string(lhs.Cols()) + ' '
+            + std::to_string(rhs.Rows()));
+  }
+  Matrix<T> result(lhs.Rows(), rhs.Cols());
+  for (int i = 0; i < lhs.Rows(); i++) {
+    for (int k = 0; k < lhs.Cols(); k++) {
+      for (int j = 0; j < rhs.Cols(); j++) {
+        result.At(i, j) += lhs.At(i, k) * rhs.At(k, j);
+      }
+    }
+  }
+  return result;
+}
