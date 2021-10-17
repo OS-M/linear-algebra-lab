@@ -62,21 +62,20 @@ void GetLu(const AbstractMatrix<T>& a,
   auto n = a.Rows();
   u = a;
   for (int i = 0; i < n; i++) {
-    for (int j = i; j < n; j++) {
-      l.At(j, i) = u.At(j, i) / u.At(i, i);
+    for (int j = 0; j <= i; j++) {
+      l.At(i, j) = u.At(i, j) / u.At(i, i);
     }
   }
 
   for (int k = 1; k < n; k++) {
     for (int i = k - 1; i < n; i++) {
-      for (int j = i; j < n; j++) {
-        l.At(j, i) = u.At(j, i) / u.At(i, i);
+      for (int j = k - 1; j <= i; j++) {
+        l.At(i, j) = u.At(i, j) / u.At(i, i);
       }
     }
-
     for (int i = k; i < n; i++) {
       for (int j = k - 1; j < n; j++) {
-        u.At(i, j) = u.At(i, j) - l.At(i, k - 1) * u.At(k - 1, j);
+        u.At(i, j) -= l.At(i, k - 1) * u.At(k - 1, j);
       }
     }
   }

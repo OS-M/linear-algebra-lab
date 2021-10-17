@@ -28,13 +28,22 @@ void TestSolvers(int n, int test_count, int seed) {
 
   Matrix<double> lu_l(n);
   Matrix<double> lu_u(n);
-  algebra::GetLu(a, lu_l, lu_u);
-  std::cout << "Ready lu\n";
+  {
+    TimeMeasurer time_measurer;
+    algebra::GetLu(a, lu_l, lu_u);
+    std::cout << "Lu prepare: " << time_measurer.GetDurationString() << '\n';
+  }
+  if (lu_l * lu_u != a) {
+    exit(228);
+  }
 
   Matrix<double> ldlt_l(n);
   Matrix<double> ldlt_d(n, 1);
-  algebra::GetLdlt(a, ldlt_l, ldlt_d);
-  std::cout << "Ready ldlt\n";
+  {
+    TimeMeasurer time_measurer;
+    algebra::GetLdlt(a, ldlt_l, ldlt_d);
+    std::cout << "Ldlt prepare: " << time_measurer.GetDurationString() << '\n';
+  }
 
   srand(seed);
   {
@@ -57,9 +66,9 @@ void TestSolvers(int n, int test_count, int seed) {
 }
 
 int main() {
-  // TestSolvers(400, 5000, time(0));
+  TestSolvers(1000, 5000, time(0));
 
-  int n = 10;
+  int n = 3;
   Matrix<double> b(n, 1);
   for (int i = 0; i < n; i++) {
     b.At(i, 0) = 1;
