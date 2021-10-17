@@ -35,7 +35,10 @@ Matrix<T> LdltSolve(const AbstractMatrix<T>& l,
 
 template<class T>
 Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
-                           const AbstractMatrix<T>& b);
+                           const AbstractMatrix<T>& b,
+                           T eps,
+                           int check_metric_every = 10,
+                           int iteration_limit = 10000);
 
 template<class T>
 T Norm2D(const AbstractMatrix<T>& a) {
