@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <memory>
 #include "abstract_matrix.h"
 #include "mutable_matrix.h"
 #include "transposed_matrix.h"
@@ -11,25 +12,13 @@ const double kEps = 1e-6;
 template<typename T>
 class Matrix : public MutableMatrix<T> {
  public:
-  explicit Matrix(size_t size) : MutableMatrix<T>(size, size),
-                                 data_size_{size * size} {
-    data_ = new T[data_size_];
-    for (size_t i = 0; i < data_size_; i++) {
-      data_[i] = T();
-    }
-  }
-  explicit Matrix(size_t n, size_t m) : MutableMatrix<T>(n, m),
-                                        data_size_{n * m} {
-    data_ = new T[data_size_];
-    for (size_t i = 0; i < data_size_; i++) {
-      data_[i] = T();
-    }
-  }
+  explicit Matrix(size_t size) : Matrix(size, size) {}
+  explicit Matrix(size_t n, size_t m) : Matrix(n, m, T()) {}
   Matrix(size_t n, size_t m, T default_) : MutableMatrix<T>(n, m),
-                                           data_size_{n * m} {
-    data_ = new T[data_size_];
+                                           data_size_{n * m},
+                                           data_{new T[data_size_]} {
     for (size_t i = 0; i < data_size_; i++) {
-      data_[i] = default_;
+      data_.get()[i] = default_;
     }
   }
   static Matrix<T> FromAbstract(const AbstractMatrix<T>& matrix) {
@@ -44,9 +33,7 @@ class Matrix : public MutableMatrix<T> {
   Matrix(Matrix<T>&& matrix) noexcept: MutableMatrix<T>(matrix.n_, matrix.m_) {
     *this = std::move(matrix);
   }
-  virtual ~Matrix() {
-    Reset();
-  }
+  virtual ~Matrix() = default;
   static Matrix<T> Ones(size_t n) {
     Matrix<T> res(n);
     for (int i = 0; i < n; i++) {
@@ -82,11 +69,10 @@ class Matrix : public MutableMatrix<T> {
     return res;
   }
   Matrix& operator=(const AbstractMatrix<T>& other) override {
-    Reset();
     this->n_ = other.Rows();
     this->m_ = other.Cols();
     data_size_ = this->n_ * this->m_;
-    data_ = new T[data_size_];
+    data_ = std::shared_ptr<T>(new T[data_size_]);
     for (int i = 0; i < this->Rows(); i++) {
       for (int j = 0; j < this->Cols(); j++) {
         this->At(i, j) = other.At(i, j);
@@ -95,18 +81,7 @@ class Matrix : public MutableMatrix<T> {
     return *this;
   }
   Matrix& operator=(const Matrix<T>& other) {
-    if (data_ != other.data_) {
-      Reset();
-      this->n_ = other.Rows();
-      this->m_ = other.Cols();
-      data_size_ = this->n_ * this->m_;
-      data_ = new T[data_size_];
-      for (int i = 0; i < this->Rows(); i++) {
-        for (int j = 0; j < this->Cols(); j++) {
-          this->At(i, j) = other.At(i, j);
-        }
-      }
-    }
+    *this = static_cast<const AbstractMatrix<T>&>(other);
     return *this;
   }
   Matrix& operator=(Matrix<T>&& other) noexcept {
@@ -117,18 +92,23 @@ class Matrix : public MutableMatrix<T> {
     return *this;
   }
   bool operator==(const Matrix& other) const {
-    if (data_size_ != other.data_size_) {
+    if (data_size_ != other.data_size_
+        || this->n_ != other.n_
+        || this->m_ != other.m_) {
       return false;
     }
     if (data_ == other.data_) {
       return true;
     }
     for (size_t i = 0; i < data_size_; i++) {
-      if (std::abs(data_[i] - other.data_[i]) > kEps) {
+      if (std::abs(data_.get()[i] - other.data_.get()[i]) > kEps) {
         return false;
       }
     }
     return true;
+  }
+  bool operator!=(const Matrix& other) const {
+    return !(*this == other);
   }
   Matrix operator*(const Matrix& other) const {
     return static_cast<const AbstractMatrix<T>&>(*this) * other;
@@ -150,7 +130,7 @@ class Matrix : public MutableMatrix<T> {
               + std::to_string(this->Cols()));
     }
 #endif
-    return data_[this->m_ * index1 + index2];
+    return data_.get()[this->m_ * index1 + index2];
   }
 
   inline T& At(size_t index1, size_t index2) override {
@@ -162,20 +142,17 @@ class Matrix : public MutableMatrix<T> {
               + std::to_string(this->Cols()));
     }
 #endif
-    return data_[this->m_ * index1 + index2];
+    return data_.get()[this->m_ * index1 + index2];
   }
 
  private:
-  void Reset() {
-    delete[] data_;
-    data_size_ = 0;
-  }
   size_t data_size_{0};
-  T* data_{nullptr};
+  std::shared_ptr<T> data_{nullptr};
 };
 
-template <class T>
-Matrix<T> operator*(const AbstractMatrix<T>& lhs, const Matrix<T>& rhs) {
+template<class T>
+Matrix<T> operator*(const AbstractMatrix<T>& lhs,
+                    const AbstractMatrix<T>& rhs) {
   if (lhs.Cols() != rhs.Rows()) {
     throw std::runtime_error(
         "Bad matrix sizes " + std::to_string(lhs.Cols()) + ' '

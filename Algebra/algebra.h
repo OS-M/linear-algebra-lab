@@ -94,16 +94,16 @@ void GetLdlt(const AbstractMatrix<T>& a,
     for (int j = i; j < n; j++) {
       T sum = a.At(j, i);
       for (int k = 0; k < i; k++) {
-        sum -= l.At(i, k) * d.At(k, k) * l.At(j, k);
+        sum -= l.At(i, k) * d.At(k, 0) * l.At(j, k);
       }
       if (i == j) {
         // if (sum <= 0) {
         // throw std::runtime_error("A is not positive defined");
         // }
-        d.At(i, i) = sum;
+        d.At(i, 0) = sum;
         l.At(i, i) = 1;
       } else {
-        l.At(j, i) = sum / d.At(i, i);
+        l.At(j, i) = sum / d.At(i, 0);
       }
     }
   }

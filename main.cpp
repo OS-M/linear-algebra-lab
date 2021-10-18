@@ -44,6 +44,13 @@ void TestSolvers(int n, int test_count, int seed) {
     algebra::GetLdlt(a, ldlt_l, ldlt_d);
     std::cout << "Ldlt prepare: " << time_measurer.GetDurationString() << '\n';
   }
+  Matrix<double> ldlt_d_full(n, n);
+  for (int i = 0; i < n; i++) {
+    ldlt_d_full.At(i, i) = ldlt_d.At(i, 0);
+  }
+  if (ldlt_l * ldlt_d_full * ldlt_l.Transposed() != a) {
+    exit(229);
+  }
 
   srand(seed);
   {
@@ -66,20 +73,7 @@ void TestSolvers(int n, int test_count, int seed) {
 }
 
 int main() {
-  TestSolvers(1000, 5000, time(0));
-
-  Matrix<double> m(3);
-  Matrix<double> l(3);
-  Matrix<double> d(3);
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      m.At(i, j) = i + j + 1;
-    }
-  }
-  algebra::GetLu(m, l, d);
-  std::cout << l << '\n' << d << '\n' <<
-            l * d << '\n';
-  std::cout << m << '\n';
+  TestSolvers(100, 5000, time(0));
 
   int n = 3;
   Matrix<double> b(n, 1);
