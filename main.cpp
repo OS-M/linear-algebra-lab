@@ -68,6 +68,19 @@ void TestSolvers(int n, int test_count, int seed) {
 int main() {
   TestSolvers(1000, 5000, time(0));
 
+  Matrix<double> m(3);
+  Matrix<double> l(3);
+  Matrix<double> d(3);
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      m.At(i, j) = i + j + 1;
+    }
+  }
+  algebra::GetLu(m, l, d);
+  std::cout << l << '\n' << d << '\n' <<
+            l * d << '\n';
+  std::cout << m << '\n';
+
   int n = 3;
   Matrix<double> b(n, 1);
   for (int i = 0; i < n; i++) {

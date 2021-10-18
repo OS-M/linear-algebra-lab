@@ -62,23 +62,24 @@ void GetLu(const AbstractMatrix<T>& a,
   if (!a.IsSquare()) {
     throw std::runtime_error("A is not square");
   }
-  auto n = a.Rows();
-  u = a;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j <= i; j++) {
-      l.At(i, j) = u.At(i, j) / u.At(i, i);
-    }
-  }
 
-  for (int k = 1; k < n; k++) {
-    for (int i = k - 1; i < n; i++) {
-      for (int j = k - 1; j <= i; j++) {
-        l.At(i, j) = u.At(i, j) / u.At(i, i);
+  u = a;
+  auto n = a.Rows();
+  for (int k = 0; k < n - 1; k++) {
+    for (int i = k + 1; i < n; i++) {
+      u.At(i, k) /= u.At(k, k);
+      for (int j = k + 1; j < n; j++) {
+        u.At(i, j) -= u.At(i, k) * u.At(k, j);
       }
     }
-    for (int i = k; i < n; i++) {
-      for (int j = k - 1; j < n; j++) {
-        u.At(i, j) -= l.At(i, k - 1) * u.At(k - 1, j);
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j <= i; j++) {
+      l.At(i, j) = u.At(i, j);
+      if (i == j) {
+        l.At(i, j) = 1;
+      } else {
+        u.At(i, j) = 0;
       }
     }
   }
@@ -93,16 +94,16 @@ void GetLdlt(const AbstractMatrix<T>& a,
     for (int j = i; j < n; j++) {
       T sum = a.At(j, i);
       for (int k = 0; k < i; k++) {
-        sum -= l.At(i, k) * d.At(k, 0) * l.At(j, k);
+        sum -= l.At(i, k) * d.At(k, k) * l.At(j, k);
       }
       if (i == j) {
         // if (sum <= 0) {
         // throw std::runtime_error("A is not positive defined");
         // }
-        d.At(i, 0) = sum;
+        d.At(i, i) = sum;
         l.At(i, i) = 1;
       } else {
-        l.At(j, i) = sum / d.At(i, 0);
+        l.At(j, i) = sum / d.At(i, i);
       }
     }
   }
@@ -159,8 +160,8 @@ template<class T>
 Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
                            const AbstractMatrix<T>& b,
                            T eps,
-                           int check_metric_every = 10,
-                           int iteration_limit = 10000) {
+                           int check_metric_every,
+                           int iteration_limit) {
   Matrix<T> x(b.Rows(), 1);
   int counter = 0;
   while (counter++ < iteration_limit) {

@@ -33,7 +33,7 @@ class AbstractMatrix {
   std::string ToWolframString() const {
     std::stringstream res;
     res << "{";
-    for (int i = 0; i < this->Size().first; i++) {
+    for (int i = 0; i < this->Rows(); i++) {
       res << "{";
       for (int j = 0; j < this->Cols(); j++) {
         res << std::fixed << std::setprecision(4) << this->At(i, j);
@@ -42,7 +42,7 @@ class AbstractMatrix {
         }
       }
       res << "}";
-      if (i + 1 != this->Size().first) {
+      if (i + 1 != this->Rows()) {
         res << ",";
       }
     }
