@@ -100,31 +100,33 @@ int main() {
   //   std::cout << solve << a * solve;
   // }
 
-  {
-    for (int i = 0; i < 100; i++) {
-      Matrix<double> a(3);
-      a.Randomize(100);
-      Matrix<double> b(3, 1);
-      b.Randomize(100);
-      // std::cout << a << b;
-      auto solve = algebra::GaussSolve(a, b);
-      // std::cout << solve << a * solve;
-      if (a * solve != b) {
-        std::cout << b << a * solve << "===========\n";
-      }
-    }
-  }
+  // {
+  //   for (int i = 0; i < 100; i++) {
+  //     Matrix<double> a(3);
+  //     a.Randomize(100);
+  //     Matrix<double> b(3, 1);
+  //     b.Randomize(100);
+  //     // std::cout << a << b;
+  //     auto solve = algebra::GaussSolve(a, b);
+  //     // std::cout << solve << a * solve;
+  //     if (a * solve != b) {
+  //       std::cout << b << a * solve << "===========\n";
+  //     }
+  //   }
+  // }
 
   // {
-  //   int n = 3;
+  //   int n = 4000;
   //   Matrix<double> b(n, 1);
   //   for (int i = 0; i < n; i++) {
   //     b.At(i, 0) = 1;
   //   }
+  //   int iters = 0;
   //   auto a = DiagonalBoxMatrix<double>(n);
-  //   auto solve = algebra::GaussSeidelSolve(a, b, 1e-10);
+  //   auto solve = algebra::GaussSeidelSolve(a, b, 1e-10, 1, 10000, &iters);
   //   std::cout << solve;
   //   std::cout << Matrix<double>::FromAbstract(a) * solve;
+  //   std::cout << iters;
   //   return 0;
   // }
 }

@@ -39,7 +39,8 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
                            const AbstractMatrix<T>& b,
                            T eps,
                            int check_metric_every = 10,
-                           int iteration_limit = 10000);
+                           int iteration_limit = 10000,
+                           int* iterations = nullptr);
 
 template<class T>
 Matrix<T> GaussSolve(const AbstractMatrix<T>& a,
@@ -167,7 +168,8 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
                            const AbstractMatrix<T>& b,
                            T eps,
                            int check_metric_every,
-                           int iteration_limit) {
+                           int iteration_limit,
+                           int* iterations) {
   Matrix<T> x(b.Rows(), 1);
   int counter = 0;
   while (counter++ < iteration_limit) {
@@ -183,6 +185,9 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
     if (counter % check_metric_every == 0 && Norm2D(a * x - b) < eps) {
       break;
     }
+  }
+  if (iterations) {
+    *iterations = counter;
   }
   return x;
 }
