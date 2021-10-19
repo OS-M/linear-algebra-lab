@@ -73,8 +73,50 @@ void TestSolvers(int n, int test_count, int seed) {
 }
 
 int main() {
-  TestSolvers(100, 5000, time(0));
+  srand(228);
+  // TestSolvers(100, 5000, time(0));
 
+  // {
+  //   Matrix<double> a{{0.593086, -0.633130, 0.193700},
+  //                    {-0.633130, 0.559382, -0.108334},
+  //                    {0.193700, -0.108334 ,-0.800050}};
+  //   Matrix<double> l(3);
+  //   Matrix<double> d(3, 1);
+  //   algebra::GetLdlt(a, l, d);
+  //   Matrix<double> ldlt_d_full(3);
+  //   for (int i = 0; i < 3; i++) {
+  //     ldlt_d_full.At(i, i) = d.At(i, 0);
+  //   }
+  //   std::cout << l << ldlt_d_full << l * ldlt_d_full * l.Transposed();
+  // }
+
+  // {
+  //   Matrix<double> a{{2, -1, 0},
+  //                    {-1, 1, 4},
+  //                    {1, 2, 3}};
+  //   Matrix<double> b{{0}, {13}, {14}};
+  //   std::cout << a << b;
+  //   auto solve = algebra::GaussSolve(a, b);
+  //   std::cout << solve << a * solve;
+  // }
+
+  {
+    for (int i = 0; i < 100; i++) {
+      Matrix<double> a(3);
+      a.Randomize(100);
+      Matrix<double> b(3, 1);
+      b.Randomize(100);
+      // std::cout << a << b;
+      auto solve = algebra::GaussSolve(a, b);
+      // std::cout << solve << a * solve;
+      if (a * solve != b) {
+        std::cout << b << a * solve << "===========\n";
+      }
+    }
+  }
+
+
+  return 0;
   int n = 3;
   Matrix<double> b(n, 1);
   for (int i = 0; i < n; i++) {
@@ -82,7 +124,7 @@ int main() {
   }
   auto a = DiagonalBoxMatrix<double>(n);
   auto solve = algebra::GaussSeidelSolve(a, b, 1e-10);
-  std::cout << solve << '\n';
-  std::cout << Matrix<double>::FromAbstract(a) * solve << '\n';
+  std::cout << solve;
+  std::cout << Matrix<double>::FromAbstract(a) * solve;
   return 0;
 }

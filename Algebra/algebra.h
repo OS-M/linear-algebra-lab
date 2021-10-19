@@ -1,5 +1,6 @@
 #pragma once
 
+#include <numeric>
 #include "Matrix/abstract_matrix.h"
 #include "Matrix/matrix.h"
 
@@ -39,6 +40,11 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
                            T eps,
                            int check_metric_every = 10,
                            int iteration_limit = 10000);
+
+template<class T>
+Matrix<T> GaussSolve(const AbstractMatrix<T>& a,
+                     const AbstractMatrix<T>& b,
+                     T eps = 1e-10);
 
 template<class T>
 T Norm2D(const AbstractMatrix<T>& a) {
@@ -179,6 +185,54 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
     }
   }
   return x;
+}
+
+template<class T>
+Matrix<T> GaussSolve(const AbstractMatrix<T>& a_,
+                     const AbstractMatrix<T>& b_,
+                     T eps) {
+  auto n = a_.Rows();
+  auto a = Matrix<T>::FromAbstract(a_);
+  auto b = Matrix<T>::FromAbstract(b_);
+  std::vector<size_t> reindex(n);
+  std::iota(reindex.begin(), reindex.end(), 0);
+
+  for (int i = 0; i < n; i++) {
+    size_t index_of_max = i;
+    for (int k = i + 1; k < n; k++) {
+      if (a.At(reindex[index_of_max], i) < a.At(reindex[k], i)) {
+        index_of_max = k;
+      }
+    }
+    std::swap(reindex[i], reindex[index_of_max]);
+    if (std::abs(a.At(reindex[i], i)) < eps) {
+      continue;
+    }
+    for (int j = i + 1; j < n; j++) {
+      if (std::abs(a.At(reindex[j], i)) < eps) {
+        continue;
+      }
+      auto m = a.At(reindex[j], i) / a.At(reindex[i], i);
+      for (int k = i + 1; k < n; k++) {
+        a.At(reindex[j], k) -= m * a.At(reindex[i], k);
+      }
+      a.At(reindex[j], i) = 0;
+      b.At(reindex[j], 0) -= m * b.At(reindex[i], 0);
+      // std::cout << a << b << "===============\n";
+    }
+  }
+
+  // std::cout << a << b;
+
+  auto swapped_a = a;
+  auto swapped_b = b;
+  for (int i = 0; i < n; i++) {
+    swapped_b.At(i, 0) = b.At(reindex[i], 0);
+    for (int j = 0; j < n; j++) {
+      swapped_a.At(i, j) = a.At(reindex[i], j);
+    }
+  }
+  return SolveUxb(swapped_a, swapped_b);
 }
 
 }

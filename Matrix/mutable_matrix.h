@@ -1,7 +1,6 @@
 #pragma once
 
 #include "abstract_matrix.h"
-#include "matrix.h"
 
 template<class T>
 class MutableMatrix : public AbstractMatrix<T> {

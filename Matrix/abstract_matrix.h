@@ -82,7 +82,7 @@ std::ostream& operator<<(std::ostream& stream,
       stream << '\n';
     }
   }
-  stream << "]";
+  stream << "]\n";
   return stream;
 }
 
