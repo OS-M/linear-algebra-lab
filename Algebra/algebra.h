@@ -218,11 +218,8 @@ Matrix<T> GaussSolve(const AbstractMatrix<T>& a_,
       }
       a.At(reindex[j], i) = 0;
       b.At(reindex[j], 0) -= m * b.At(reindex[i], 0);
-      // std::cout << a << b << "===============\n";
     }
   }
-
-  // std::cout << a << b;
 
   auto swapped_a = a;
   auto swapped_b = b;

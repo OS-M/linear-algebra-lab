@@ -115,16 +115,16 @@ int main() {
     }
   }
 
-
-  return 0;
-  int n = 3;
-  Matrix<double> b(n, 1);
-  for (int i = 0; i < n; i++) {
-    b.At(i, 0) = 1;
-  }
-  auto a = DiagonalBoxMatrix<double>(n);
-  auto solve = algebra::GaussSeidelSolve(a, b, 1e-10);
-  std::cout << solve;
-  std::cout << Matrix<double>::FromAbstract(a) * solve;
-  return 0;
+  // {
+  //   int n = 3;
+  //   Matrix<double> b(n, 1);
+  //   for (int i = 0; i < n; i++) {
+  //     b.At(i, 0) = 1;
+  //   }
+  //   auto a = DiagonalBoxMatrix<double>(n);
+  //   auto solve = algebra::GaussSeidelSolve(a, b, 1e-10);
+  //   std::cout << solve;
+  //   std::cout << Matrix<double>::FromAbstract(a) * solve;
+  //   return 0;
+  // }
 }
