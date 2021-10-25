@@ -3,6 +3,8 @@
 
 pi.txt
 
+task*.txt
+
 # C++ objects and libs
 *.slo
 *.lo
