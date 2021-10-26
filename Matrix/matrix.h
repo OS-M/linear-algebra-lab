@@ -4,7 +4,7 @@
 #include <iomanip>
 #include "mutable_matrix.h"
 
-const double kEps = 1e-6;
+const double kEps = 1e-2;
 
 template<typename T>
 class Matrix : public MutableMatrix<T> {

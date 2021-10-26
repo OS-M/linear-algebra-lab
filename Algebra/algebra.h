@@ -154,13 +154,14 @@ Matrix<T> LuSolve(const AbstractMatrix<T>& l,
 template<class T>
 Matrix<T> LdltSolve(const AbstractMatrix<T>& l,
                     const AbstractMatrix<T>& d,
+                    const AbstractMatrix<T>& l_t,
                     const AbstractMatrix<T>& b) {
   auto n = d.Rows();
   auto y = SolveLxb(l, b);
   for (int i = 0; i < n; i++) {
     y.At(i, 0) /= d.At(i, 0);
   }
-  return SolveUxb(l.Transposed(), y);
+  return SolveUxb(l_t, y);
 }
 
 template<class T>

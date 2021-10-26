@@ -43,9 +43,16 @@ std::vector<double> TestTask1Solvers(int n, int test_count, int seed) {
 
   Matrix<double> ldlt_l(n);
   Matrix<double> ldlt_d(n, 1);
+  Matrix<double> ldlt_l_transposed(n, 1);
   {
     TimeMeasurer time_measurer;
     algebra::GetLdlt(a, ldlt_l, ldlt_d);
+    ldlt_l_transposed = ldlt_l;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < i; j++) {
+        std::swap(ldlt_l_transposed.At(i, j), ldlt_l_transposed.At(j, i));
+      }
+    }
     std::cout << "Ldlt prepare: " << time_measurer.GetDurationString() << '\n';
     durations.push_back(time_measurer.GetDuration());
   }
@@ -53,7 +60,7 @@ std::vector<double> TestTask1Solvers(int n, int test_count, int seed) {
   for (int i = 0; i < n; i++) {
     ldlt_d_full.At(i, i) = ldlt_d.At(i, 0);
   }
-  // if (ldlt_l * ldlt_d_full * ldlt_l.Transposed() != a) {
+  // if (ldlt_l * ldlt_d_full * ldlt_l_transposed != a) {
   //   exit(229);
   // }
 
@@ -72,7 +79,7 @@ std::vector<double> TestTask1Solvers(int n, int test_count, int seed) {
     TimeMeasurer time_measurer;
     for (int test = 0; test < test_count; test++) {
       b.Randomize();
-      auto ldlt_x = algebra::LdltSolve(ldlt_l, ldlt_d, b);
+      auto ldlt_x = algebra::LdltSolve(ldlt_l, ldlt_d, ldlt_l_transposed, b);
     }
     std::cout << "Ldlt: " << time_measurer.GetDurationString() << '\n';
     durations.push_back(time_measurer.GetDuration());
@@ -120,7 +127,7 @@ void Task1(int solve_count = 1000) {
 
 int main() {
   srand(228);
-  Task1(100);
+  Task1(2000);
 
   // {
   //   Matrix<double> a{{0.593086, -0.633130, 0.193700},
