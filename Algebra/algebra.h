@@ -55,7 +55,7 @@ T Norm2D(const AbstractMatrix<T>& a) {
       res += a.At(i, j) * a.At(i, j);
     }
   }
-  return res;
+  return std::sqrt(res);
 }
 
 }
