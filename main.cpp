@@ -153,13 +153,22 @@ int main() {
   //   std::cout << solve << a * solve;
   // }
 
+  // {
+  //   Matrix<double> a{{1, 2, 0},
+  //                    {2, 4, 0},
+  //                    {3, 9, 0}};
+  //   std::cout << a.ToWolframString() << '\n';
+  //   std::cout << algebra::GaussSolve(a, Matrix<double>(3, 1)).second;
+  // }
+
   {
-    Matrix<double> a{{1, 2, 0},
-                     {2, 4, 0},
-                     {3, 9, 0}};
-    std::cout << a.ToWolframString() << '\n';
-    std::cout << algebra::GaussSolve(a, Matrix<double>(3, 1)).second;
+    int n = 10;
+    Matrix<double> a(n);
+    algebra::FillRandomNonDegenerate(a, 0, 1., 10.);
+    // std::cout << a << a.ToWolframString() << '\n';
+    std::cout << algebra::GaussSolve(a, Matrix<double>(n, 1)).second;
   }
+
   // {
   //   for (int i = 0; i < 100; i++) {
   //     Matrix<double> a(3);
@@ -175,18 +184,18 @@ int main() {
   //   }
   // }
 
-  {
-    int n = 4000;
-    Matrix<double> b(n, 1);
-    for (int i = 0; i < n; i++) {
-      b.At(i, 0) = 1;
-    }
-    int iters = 0;
-    auto a = DiagonalBoxMatrix<double>(n);
-    auto solve = algebra::GaussSeidelSolve(a, b, 1e-10, 1, 10000, &iters);
-    std::cout << solve;
-    std::cout << Matrix<double>::FromAbstract(a) * solve;
-    std::cout << iters;
-    return 0;
-  }
+  // {
+  //   int n = 4000;
+  //   Matrix<double> b(n, 1);
+  //   for (int i = 0; i < n; i++) {
+  //     b.At(i, 0) = 1;
+  //   }
+  //   int iters = 0;
+  //   auto a = DiagonalBoxMatrix<double>(n);
+  //   auto solve = algebra::GaussSeidelSolve(a, b, 1e-10, 1, 10000, &iters);
+  //   std::cout << solve;
+  //   std::cout << Matrix<double>::FromAbstract(a) * solve;
+  //   std::cout << iters;
+  //   return 0;
+  // }
 }

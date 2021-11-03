@@ -244,12 +244,16 @@ std::pair<Matrix<T>, int> GaussSolve(const AbstractMatrix<T>& a_,
       rank++;
     }
   }
-  std::cout << swapped_a;
   return {SolveUxb(swapped_a, swapped_b), rank};
 }
 
 template<class T>
-void FillRandomNonDegenerate(Matrix<T>& a, double k, T eps) {
+void FillRandomNonDegenerate(Matrix<T>& a,
+                             double k,
+                             T min,
+                             T max,
+                             int seed = time(nullptr),
+                             T eps = 1e-6) {
   auto n = a.Rows();
 
   for (int i = 0; i < n; i++) {
@@ -258,10 +262,11 @@ void FillRandomNonDegenerate(Matrix<T>& a, double k, T eps) {
     }
   }
   int not_zeros_in_row = n - n * k;
-  std::mt19937 gen(228);
-  std::uniform_real_distribution<T> distr(-100, 100);
+  std::mt19937 gen(seed);
+  std::uniform_real_distribution<T> distr(min, max);
 
   std::vector<bool> used_cols(n);
+  int retries = 0;
   std::vector<std::tuple<size_t, size_t, T>> transforms;
   auto good_matrix = [&](int cur_row_index) -> bool {
     std::vector<T> cur_row(n);
@@ -279,6 +284,7 @@ void FillRandomNonDegenerate(Matrix<T>& a, double k, T eps) {
       }
     }
     if (possible_cols.empty()) {
+      retries++;
       return false;
     }
     auto cur_col_index = possible_cols[gen() % possible_cols.size()];
@@ -296,16 +302,17 @@ void FillRandomNonDegenerate(Matrix<T>& a, double k, T eps) {
 
   for (int i = 0; i < n; i++) {
     std::vector<T> row(n);
-    for (int j = 0; j < not_zeros_in_row; j++) {
-      row[j] = distr(gen);
-    }
     do {
-      std::shuffle(row.begin, row.end(), gen);
+      for (int j = 0; j < not_zeros_in_row; j++) {
+        row[j] = distr(gen);
+      }
+      std::shuffle(row.begin(), row.end(), gen);
       for (int j = 0; j < n; j++) {
         a.At(i, j) = row[j];
       }
     } while (!good_matrix(i));
   }
+  // std::cerr << retries << '\n';
 }
 
 }
