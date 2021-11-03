@@ -1,6 +1,7 @@
 #pragma once
 
 #include <numeric>
+#include <random>
 #include "Matrix/abstract_matrix.h"
 #include "Matrix/matrix.h"
 
@@ -247,8 +248,8 @@ std::pair<Matrix<T>, int> GaussSolve(const AbstractMatrix<T>& a_,
   return {SolveUxb(swapped_a, swapped_b), rank};
 }
 
-template <class T>
-void FillRandomNonDegenerate(Matrix<T>& a, double k) {
+template<class T>
+void FillRandomNonDegenerate(Matrix<T>& a, double k, T eps) {
   auto n = a.Rows();
 
   for (int i = 0; i < n; i++) {
@@ -256,7 +257,55 @@ void FillRandomNonDegenerate(Matrix<T>& a, double k) {
       a.At(i, j) = 0;
     }
   }
-  for (int i = 0; i < )
+  int not_zeros_in_row = n - n * k;
+  std::mt19937 gen(228);
+  std::uniform_real_distribution<T> distr(-100, 100);
+
+  std::vector<bool> used_cols(n);
+  std::vector<std::tuple<size_t, size_t, T>> transforms;
+  auto good_matrix = [&](int cur_row_index) -> bool {
+    std::vector<T> cur_row(n);
+    for (int i = 0; i < n; i++) {
+      cur_row[i] = a.At(cur_row_index, i);
+    }
+    for (auto[from, to, koef]: transforms) {
+      cur_row[to] += cur_row[from] * koef;
+    }
+
+    std::vector<size_t> possible_cols;
+    for (int i = 0; i < n; i++) {
+      if (!used_cols[i] && std::abs(cur_row[i]) > eps) {
+        possible_cols.push_back(i);
+      }
+    }
+    if (possible_cols.empty()) {
+      return false;
+    }
+    auto cur_col_index = possible_cols[gen() % possible_cols.size()];
+    used_cols[cur_col_index] = true;
+    for (int i = 0; i < n; i++) {
+      if (cur_col_index == i || std::abs(cur_row[i]) < eps) {
+        continue;
+      }
+      transforms.push_back(
+          std::make_tuple(cur_col_index, i,
+                          -cur_row[i] / cur_row[cur_col_index]));
+    }
+    return true;
+  };
+
+  for (int i = 0; i < n; i++) {
+    std::vector<T> row(n);
+    for (int j = 0; j < not_zeros_in_row; j++) {
+      row[j] = distr(gen);
+    }
+    do {
+      std::shuffle(row.begin, row.end(), gen);
+      for (int j = 0; j < n; j++) {
+        a.At(i, j) = row[j];
+      }
+    } while (!good_matrix(i));
+  }
 }
 
 }

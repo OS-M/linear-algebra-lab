@@ -175,18 +175,18 @@ int main() {
   //   }
   // }
 
-  // {
-  //   int n = 4000;
-  //   Matrix<double> b(n, 1);
-  //   for (int i = 0; i < n; i++) {
-  //     b.At(i, 0) = 1;
-  //   }
-  //   int iters = 0;
-  //   auto a = DiagonalBoxMatrix<double>(n);
-  //   auto solve = algebra::GaussSeidelSolve(a, b, 1e-10, 1, 10000, &iters);
-  //   std::cout << solve;
-  //   std::cout << Matrix<double>::FromAbstract(a) * solve;
-  //   std::cout << iters;
-  //   return 0;
-  // }
+  {
+    int n = 4000;
+    Matrix<double> b(n, 1);
+    for (int i = 0; i < n; i++) {
+      b.At(i, 0) = 1;
+    }
+    int iters = 0;
+    auto a = DiagonalBoxMatrix<double>(n);
+    auto solve = algebra::GaussSeidelSolve(a, b, 1e-10, 1, 10000, &iters);
+    std::cout << solve;
+    std::cout << Matrix<double>::FromAbstract(a) * solve;
+    std::cout << iters;
+    return 0;
+  }
 }
