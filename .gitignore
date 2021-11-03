@@ -4,6 +4,7 @@
 pi.txt
 
 task*.txt
+task*.png
 
 # C++ objects and libs
 *.slo

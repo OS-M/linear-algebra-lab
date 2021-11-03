@@ -88,13 +88,13 @@ std::vector<double> TestTask1Solvers(int n, int test_count, int seed) {
 }
 
 void Task1(int solve_count = 1000) {
-  std::vector<int> sizes{400, 800, 1200, 1600, 2000};
+  std::vector<int> sizes{4000, 4400, 4800};
   // std::vector<int> sizes{40, 80, 120, 160, 200};
   std::vector<double> lu_prepare;
   std::vector<double> ldlt_prepare;
   std::vector<double> lu_solve;
   std::vector<double> ldlt_solve;
-  for (auto size : sizes) {
+  for (auto size: sizes) {
     auto times = TestTask1Solvers(size, solve_count, 228);
     lu_prepare.push_back(times[0]);
     ldlt_prepare.push_back(times[1]);
@@ -102,32 +102,32 @@ void Task1(int solve_count = 1000) {
     ldlt_solve.push_back(times[3]);
   }
   std::ofstream out("../task1.txt");
-  for (auto size : sizes) {
+  for (auto size: sizes) {
     out << size << ' ';
   }
   out << '\n';
   out << "LU Prepare/LDLt Prepare/LU Solve/LDLt solve\n";
-  for (auto time : lu_prepare) {
+  for (auto time: lu_prepare) {
     out << time << ' ';
   }
   out << '\n';
-  for (auto time : ldlt_prepare) {
+  for (auto time: ldlt_prepare) {
     out << time << ' ';
   }
   out << '\n';
-  for (auto time : lu_solve) {
+  for (auto time: lu_solve) {
     out << time << ' ';
   }
   out << '\n';
-  for (auto time : ldlt_solve) {
+  for (auto time: ldlt_solve) {
     out << time << ' ';
   }
   out << '\n';
 }
 
 int main() {
-  srand(228);
-  Task1(2000);
+  // srand(228);
+  // Task1(2000);
 
   // {
   //   Matrix<double> a{{0.593086, -0.633130, 0.193700},
@@ -153,6 +153,13 @@ int main() {
   //   std::cout << solve << a * solve;
   // }
 
+  {
+    Matrix<double> a{{1, 2, 0},
+                     {2, 4, 0},
+                     {3, 9, 0}};
+    std::cout << a.ToWolframString() << '\n';
+    std::cout << algebra::GaussSolve(a, Matrix<double>(3, 1)).second;
+  }
   // {
   //   for (int i = 0; i < 100; i++) {
   //     Matrix<double> a(3);
@@ -160,7 +167,7 @@ int main() {
   //     Matrix<double> b(3, 1);
   //     b.Randomize(100);
   //     // std::cout << a << b;
-  //     auto solve = algebra::GaussSolve(a, b);
+  //     auto [solve, rank] = algebra::GaussSolve(a, b);
   //     // std::cout << solve << a * solve;
   //     if (a * solve != b) {
   //       std::cout << b << a * solve << "===========\n";

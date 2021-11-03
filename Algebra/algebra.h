@@ -43,9 +43,9 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
                            int* iterations = nullptr);
 
 template<class T>
-Matrix<T> GaussSolve(const AbstractMatrix<T>& a,
-                     const AbstractMatrix<T>& b,
-                     T eps = 1e-10);
+std::pair<Matrix<T>, int> GaussSolve(const AbstractMatrix<T>& a,
+                                     const AbstractMatrix<T>& b,
+                                     T eps = 1e-10);
 
 template<class T>
 T Norm2D(const AbstractMatrix<T>& a) {
@@ -194,9 +194,9 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
 }
 
 template<class T>
-Matrix<T> GaussSolve(const AbstractMatrix<T>& a_,
-                     const AbstractMatrix<T>& b_,
-                     T eps) {
+std::pair<Matrix<T>, int> GaussSolve(const AbstractMatrix<T>& a_,
+                                     const AbstractMatrix<T>& b_,
+                                     T eps) {
   auto n = a_.Rows();
   auto a = Matrix<T>::FromAbstract(a_);
   auto b = Matrix<T>::FromAbstract(b_);
@@ -229,13 +229,34 @@ Matrix<T> GaussSolve(const AbstractMatrix<T>& a_,
 
   auto swapped_a = a;
   auto swapped_b = b;
+  int rank = 0;
   for (int i = 0; i < n; i++) {
     swapped_b.At(i, 0) = b.At(reindex[i], 0);
+    int zeros = 0;
     for (int j = 0; j < n; j++) {
       swapped_a.At(i, j) = a.At(reindex[i], j);
+      if (std::abs(swapped_a.At(i, j)) < eps) {
+        zeros++;
+      }
+    }
+    if (zeros != n) {
+      rank++;
     }
   }
-  return SolveUxb(swapped_a, swapped_b);
+  std::cout << swapped_a;
+  return {SolveUxb(swapped_a, swapped_b), rank};
+}
+
+template <class T>
+void FillRandomNonDegenerate(Matrix<T>& a, double k) {
+  auto n = a.Rows();
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      a.At(i, j) = 0;
+    }
+  }
+  for (int i = 0; i < )
 }
 
 }
