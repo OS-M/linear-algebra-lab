@@ -114,16 +114,18 @@ class Matrix : public MutableMatrix<T> {
     }
   }
   Matrix operator*(T value) const {
+    Matrix res(*this);
     for (int i = 0; i < data_size_; i++) {
-      data_[i] *= value;
+      res.data_[i] *= value;
     }
-    return *this;
+    return res;
   }
   Matrix operator/(T value) const {
+    Matrix res(*this);
     for (int i = 0; i < data_size_; i++) {
-      data_[i] /= value;
+      res.data_[i] /= value;
     }
-    return *this;
+    return res;
   }
 
   inline T At(size_t index1, size_t index2) const override {
@@ -182,10 +184,19 @@ bool operator==(const AbstractMatrix<T>& lhs,
   }
   for (int i = 0; i < lhs.Rows(); i++) {
     for (int j = 0; j < lhs.Cols(); j++) {
+      if (lhs.At(i, j) != lhs.At(i, j) || rhs.At(i, j) != rhs.At(i, j)) {
+        return false;
+      }
       if (std::abs(lhs.At(i, j) - rhs.At(i, j)) > kEps) {
         return false;
       }
     }
   }
   return true;
+}
+
+template<class T>
+bool operator!=(const AbstractMatrix<T>& lhs,
+                const AbstractMatrix<T>& rhs) {
+  return !(lhs == rhs);
 }

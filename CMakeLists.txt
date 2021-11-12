@@ -40,10 +40,10 @@ set(UBSAN_FLAGS
         FORCE)
 
 # Build Types
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${UBSAN_FLAGS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${ASAN_FLAGS}")
 
 add_executable(vma1 main.cpp
         TimeMeasurer/time_measurer.cpp
         TimeMeasurer/time_measurer.h
         Algebra/algebra.cpp
-        Algebra/algebra.h Matrix/abstract_matrix.h Matrix/diagonal_box_matrix.h Matrix/mutable_matrix.h Matrix/transposed_matrix.h)
+        Algebra/algebra.h Matrix/abstract_matrix.h Matrix/diagonal_box_matrix.h Matrix/mutable_matrix.h Matrix/transposed_matrix.h Algebra/gmres.h)

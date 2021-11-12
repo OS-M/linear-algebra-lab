@@ -49,7 +49,7 @@ std::pair<Matrix<T>, int> GaussSolve(const AbstractMatrix<T>& a,
                                      T eps = 1e-10);
 
 template<class T>
-T Norm2D(const AbstractMatrix<T>& a) {
+T EuclideanNorm(const AbstractMatrix<T>& a) {
   T res = 0;
   for (int i = 0; i < a.Rows(); i++) {
     for (int j = 0; j < a.Cols(); j++) {
@@ -173,8 +173,8 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
                            int iteration_limit,
                            int* iterations) {
   Matrix<T> x(b.Rows(), 1);
-  int counter = 0;
-  while (counter++ < iteration_limit) {
+  int counter;
+  for (counter = 1; counter < iteration_limit; counter++) {
     for (int i = 0; i < b.Rows(); i++) {
       T now = 0;
       for (int j = 0; j < b.Rows(); j++) {
@@ -184,7 +184,7 @@ Matrix<T> GaussSeidelSolve(const AbstractMatrix<T>& a,
       }
       x.At(i, 0) = (b.At(i, 0) - now) / a.At(i, i);
     }
-    if (counter % check_metric_every == 0 && Norm2D(a * x - b) < eps) {
+    if (counter % check_metric_every == 0 && EuclideanNorm(a * x - b) < eps) {
       break;
     }
   }
@@ -233,14 +233,10 @@ std::pair<Matrix<T>, int> GaussSolve(const AbstractMatrix<T>& a_,
   int rank = 0;
   for (int i = 0; i < n; i++) {
     swapped_b.At(i, 0) = b.At(reindex[i], 0);
-    int zeros = 0;
     for (int j = 0; j < n; j++) {
       swapped_a.At(i, j) = a.At(reindex[i], j);
-      if (std::abs(swapped_a.At(i, j)) < eps) {
-        zeros++;
-      }
     }
-    if (zeros != n) {
+    if (std::fabs(swapped_a.At(i, i)) > eps) {
       rank++;
     }
   }
